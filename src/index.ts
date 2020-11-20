@@ -17,7 +17,7 @@ _debug.print("Authenticated to Twitter");
 const authClient = new google.auth.JWT(
   process.env.GOOGLE_EMAIL!,
   undefined,
-  process.env.GOOGLE_KEY,
+  process.env.GOOGLE_KEY!,
   "https://www.googleapis.com/auth/drive"
 );
 
