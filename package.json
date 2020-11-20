@@ -1,0 +1,30 @@
+{
+  "name": "serverless-gdrive-twitter",
+  "version": "1.0.0",
+  "description": "Select and upload random images from a Google Drive folder to Twitter",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "npm run build -- -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/x-t/serverless-gdrive-twitter.git"
+  },
+  "author": "zxyz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/x-t/serverless-gdrive-twitter/issues"
+  },
+  "homepage": "https://github.com/x-t/serverless-gdrive-twitter#readme",
+  "dependencies": {
+    "@types/twitter": "^1.7.0",
+    "dotenv": "^8.2.0",
+    "googleapis": "^65.0.0",
+    "twitter": "^1.7.1"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.8"
+  }
+}
