@@ -4,6 +4,7 @@ import {google} from "googleapis";
 import * as DriveWorker from "./DriveWorker";
 import {_debug} from "./_debug";
 import { DiscordHookAuth, sendDiscord, Messages } from "./DiscordWorker";
+import "./env";
 
 const client = new Twitter({
   consumer_key: process.env.TWITTER_CONSUMER_KEY!,

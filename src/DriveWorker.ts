@@ -4,7 +4,6 @@ import * as Random from "./Random";
 import { JWT } from "googleapis-common";
 import { DiscordHookAuth, Messages, sendDiscord } from "./DiscordWorker";
 import {_debug} from "./_debug";
-import "./env";
 
 interface DriveFileBuf {
   buffer: Buffer | undefined,
