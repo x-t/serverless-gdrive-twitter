@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/x-t/serverless-gdrive-twitter#readme",
   "dependencies": {
+    "@azure/functions": "^1.2.2",
     "@types/twitter": "^1.7.0",
     "dotenv": "^8.2.0",
     "googleapis": "^65.0.0",
