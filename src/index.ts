@@ -42,15 +42,12 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
     }
   });
 
-  DriveWorker.getRandomBuffer("Wallpapers", authClient)
-  .then(x => {
-    TwitterWorker.postMedia(client,
+  var x = await DriveWorker.getRandomBuffer("Wallpapers", authClient)
+  TwitterWorker.passFilename(x.filename);
+  var y = await TwitterWorker.postMedia(client,
                             x.buffer!, x.size,
                             x.mimeType, `azure is pain ${x.filename}`);
-    TwitterWorker.passFilename(x.filename);
-    });
-
-  context.log('Azure running from src/index.ts', timeStamp);   
+  return y;
 };
   
 export default timerTrigger;

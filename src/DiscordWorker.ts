@@ -37,6 +37,16 @@ Messages.fail = (error: string) => {
   }
 }
 
+Messages.debug = (text: any) => {
+  return {
+    "embeds": [{
+      "title": "Debug",
+      "description": `${text}`,
+      "color": 15299665
+    }]
+  }
+}
+
 export function sendDiscord(auth: DiscordHookAuth, content: any) {
   var data = JSON.stringify({
     username: auth.username,

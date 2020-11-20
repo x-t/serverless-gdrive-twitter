@@ -9,6 +9,7 @@ $ npm run build
 ```
 
 ## Running
+It doesn't really run anymore, because it's based on Azure triggers. However if you remove the Azure wrapper from [index.ts](src/index.ts) you can run it locally:
 ```
 $ node dist/index.js
 ```
@@ -50,6 +51,13 @@ You will need valid Twitter developer credentials in the form of a set of consum
 - Create a Function App from the dashboard
 - To deploy to Azure, use the VSC extension, Cmd-Shift-P > Deploy to Function App. I cannot be bothered to set up automatic git deployments, lmao.
 
+### Discord
+Sends you Discord notifications via a webhook. Looks something like this:
+![discord webhook](https://i.arxius.io/6c95835f.png)
+
+- Add a webhook to your channel
+- Make an username, copy the `/api` link into `prod.env` like in the example.
+
 ### prod.env
 **This is the file that stores all the tokens, usernames and emails.**
 ```
@@ -62,3 +70,36 @@ TWITTER_ACCESS_TOKEN_SECRET=""
 GOOGLE_EMAIL=""
 GOOGLE_KEY=""
 ```
+*Example*
+```
+DISCORD_USERNAME="anything here"
+DISCORD_HOOK_ENDPOINT="/api/webhooks/number/thing"
+TWITTER_CONSUMER_KEY="key"
+TWITTER_CONSUMER_SECRET="key"
+TWITTER_ACCESS_TOKEN_KEY="key"
+TWITTER_ACCESS_TOKEN_SECRET="key"
+GOOGLE_EMAIL="id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com"
+GOOGLE_KEY="-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n"
+```
+
+## Architecture
+![architecture](https://i.arxius.io/812f05c7.png)
+
+You could possibly simplify this with a better Drive query, I don't know. Also, currently there's no big video support (only <15MB will be uploaded)
+
+## Enabling debug
+Change in [src/_debug.ts](src/_debug.ts):
+```diff
+export const _debug = {
+-  enabled: false,
++  enabled: true,
+```
+
+## Different fire times
+This is controlled by your Azure Function, via a NCRONTAB syntax. Changes in [TwitterTimer1/function.json](TwitterTimer1/function.json):
+```diff
+      "direction": "in",
+-      "schedule": "0 */5 * * * *"
++      "schedule": "0 0 */1 * * *"
+```
+Exp.: removed to run every 5 minutes, added to run every 1 hour.
