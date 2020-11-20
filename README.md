@@ -48,7 +48,7 @@ You will need valid Twitter developer credentials in the form of a set of consum
 ### Azure
 - You will need an account for this (free does fine)
 - Create a Function App from the dashboard
-To deploy to Azure, use the VSC extension, Cmd-Shift-P > Deploy to Function App. I cannot be bothered to set up automatic git deployments, lmao.
+- To deploy to Azure, use the VSC extension, Cmd-Shift-P > Deploy to Function App. I cannot be bothered to set up automatic git deployments, lmao.
 
 ### prod.env
 **This is the file that stores all the tokens, usernames and emails.**
