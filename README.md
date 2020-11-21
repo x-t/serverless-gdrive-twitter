@@ -61,7 +61,7 @@ You will need valid Twitter developer credentials in the form of a set of consum
 
 ### Discord
 Sends you Discord notifications via a webhook. Looks something like this:
-![discord webhook](https://i.arxius.io/8b2deaae.png)
+![discord webhook](https://i.arxius.io/6c95835f.png)
 
 - Add a webhook to your channel
 - Make an username, copy the `/api` link into `prod.env` like in the example.
@@ -91,7 +91,7 @@ GOOGLE_KEY="-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n"
 ```
 
 ## Architecture
-![architecture](https://i.arxius.io/812f05c7.png)
+![architecture](https://i.arxius.io/8b2deaae.png)
 
 You could possibly simplify this with a better Drive query, I don't know. There is no video support as of now. [Sharp](https://github.com/lovell/sharp) is used to scale images.
 
