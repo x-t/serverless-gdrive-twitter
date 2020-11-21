@@ -78,6 +78,7 @@ TWITTER_ACCESS_TOKEN_KEY=""
 TWITTER_ACCESS_TOKEN_SECRET=""
 GOOGLE_EMAIL=""
 GOOGLE_KEY=""
+DRIVE_FOLDER=""
 ```
 *Example*
 ```
@@ -89,6 +90,7 @@ TWITTER_ACCESS_TOKEN_KEY="key"
 TWITTER_ACCESS_TOKEN_SECRET="key"
 GOOGLE_EMAIL="id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com"
 GOOGLE_KEY="-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n"
+DRIVE_FOLDER="Cats"
 ```
 
 ## Architecture

@@ -43,7 +43,7 @@ async function main() {
     }
   });
 
-  var x = await DriveWorker.getRandomBuffer("Wallpapers", authClient)
+  var x = await DriveWorker.getRandomBuffer(process.env.DRIVE_FOLDER!, authClient)
   TwitterWorker.passFilename(x.filename);
   var y = TwitterWorker.postMedia(client,
                               x.buffer!, x.size,
