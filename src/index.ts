@@ -6,8 +6,9 @@ import {_debug} from "./_debug";
 import { DiscordHookAuth, sendDiscord, Messages } from "./DiscordWorker";
 import "./env";
 import { AzureFunction, Context } from "@azure/functions"
+import retry from "async-retry";
 
-const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
+async function main() {
   var timeStamp = new Date().toISOString();
 
   const client = new Twitter({
@@ -44,10 +45,21 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
 
   var x = await DriveWorker.getRandomBuffer("Wallpapers", authClient)
   TwitterWorker.passFilename(x.filename);
-  var y = await TwitterWorker.postMedia(client,
-                            x.buffer!, x.size,
-                            x.mimeType, `azure is pain ${x.filename}`);
+  var y = TwitterWorker.postMedia(client,
+                              x.buffer!, x.size,
+                              x.mimeType, `${x.filename}`);
   return y;
 };
-  
+
+const timerTrigger: AzureFunction = async function (context: Context, myTimer: any): Promise<void> {
+  let x = await retry(async bail => {
+    await main();
+  }, {
+    retries: 3
+  });
+  return x;
+}
+
+// -- UNCOMMENT BELOW TO RUN LOCALLY --
+// main();
 export default timerTrigger;

@@ -4,6 +4,7 @@ import * as Random from "./Random";
 import { JWT } from "googleapis-common";
 import { DiscordHookAuth, Messages, sendDiscord } from "./DiscordWorker";
 import {_debug} from "./_debug";
+import sharp from "sharp";
 
 interface DriveFileBuf {
   buffer: Buffer | undefined,
@@ -17,6 +18,31 @@ let discordAuth: DiscordHookAuth;
 
 export function setDiscordAuth(auth: DiscordHookAuth) {
   discordAuth = auth;
+}
+
+let maxWidth = TwitterWorker.maxResolutions.image[0];
+let maxHeight = TwitterWorker.maxResolutions.image[1];
+
+function resizeCalc(width: number, height: number): Array<number> {
+  const aspectRatio = height / width;
+  let newDim = [0, 0];
+  if (width > maxWidth) {
+    newDim[0] = maxWidth;
+    newDim[1] = Math.round(maxWidth * aspectRatio);
+  }
+
+  if (height > maxHeight) {
+    newDim[1] = maxHeight;
+    newDim[0] = Math.round(maxHeight / aspectRatio);
+  }
+
+  if (newDim[0] > maxWidth || newDim[1] > maxHeight)
+    return resizeCalc(newDim[0], newDim[1]);
+
+  if (newDim[0] == 0 && newDim[1] == 0)
+    newDim = [width, height]
+
+  return newDim;
 }
 
 export async function getRandomBuffer(folderName: string, auth_: JWT): Promise<DriveFileBuf> {
@@ -42,7 +68,7 @@ export function getCorrectFolder(folderName: string): Promise<drive_v3.Schema$Fi
     } else {
       const files = res?.data.files!;
       if (files.length) {
-        files.map(file => {
+        files.map((file) => {
           if (file.mimeType === "application/vnd.google-apps.folder") {
             correctFolder = file;
           }
@@ -98,12 +124,16 @@ export function getRandomFile(allFiles: drive_v3.Schema$File[]): Promise<drive_v
     const randomFile: drive_v3.Schema$File = allFiles[randNum];
 
     while (true) {
-      if (!TwitterWorker.allowedTypesByType.includes(randomFile.mimeType!)
-          || parseInt(randomFile.size!) > TwitterWorker.allowedTypes[TwitterWorker.allowedTypesByType.indexOf(randomFile.mimeType!)].max) {
+      if (!TwitterWorker.allowedTypesByType.includes(randomFile.mimeType!)) {
+        // TODO: If decided to support video, below line
+        // should take in consideration the filesize of the video.
+        // With images it will be fine, as we already resize/compress them.
+
+          /*|| parseInt(randomFile.size!) > TwitterWorker.allowedTypes[TwitterWorker.allowedTypesByType.indexOf(randomFile.mimeType!)].max*/
         randNum = Random.Num(allFiles.length);
         continue;
       } else {
-        _debug.print("Got a random file that meets criteria. (scope:getRandomFile)")
+        _debug.print("Got a random file that meets criteria. (scope:getRandomFile) (file: "+randomFile.name+")")
         break;
       }
     }
@@ -135,10 +165,25 @@ export function downloadFileToBuffer(file: drive_v3.Schema$File): Promise<DriveF
 
       let buf: Uint8Array[] = [];
       data?.data.on("data", chunk => buf.push(chunk));
-      data?.data.on("end", () => {
-        _debug.print("Got buffer for file. (scope:downloadFileToBuffer)")
+      data?.data.on("end", async () => {
+        _debug.print(`Got buffer for file. (scope:downloadFileToBuffer)`)
         fileBuf.buffer = Buffer.concat(buf);
-        resolve(fileBuf);
+
+        // Resizing the image.
+        try {
+          let resizedBuffer: Buffer = await sharp(fileBuf.buffer).metadata().then(md => {
+            let [newX, newY] = resizeCalc(md.width!, md.height!);
+            return sharp(fileBuf.buffer).jpeg({quality: 40}).resize(newX, newY).toBuffer();
+          });
+
+          fileBuf.buffer = resizedBuffer;
+          fileBuf.mimeType = "image/jpeg"
+          fileBuf.size = resizedBuffer.byteLength;
+          resolve(fileBuf);
+        } catch (error) {
+          sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
+          throw new Error(JSON.stringify(error));
+        }
       });
     });
 

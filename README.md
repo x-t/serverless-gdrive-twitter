@@ -9,7 +9,15 @@ $ npm run build
 ```
 
 ## Running
-It doesn't really run anymore, because it's based on Azure triggers. However if you remove the Azure wrapper from [index.ts](src/index.ts) you can run it locally:
+Because this is designed for Azure scheduled triggers, it doesn't run locally well. However, there is a backup option.
+
+Changes in [index.ts](src/index.ts):
+```diff
+// -- UNCOMMENT BELOW TO RUN LOCALLY --
+- // main();
++ main();
+```
+Then, launch it from the terminal as usual.
 ```
 $ node dist/index.js
 ```
@@ -53,7 +61,7 @@ You will need valid Twitter developer credentials in the form of a set of consum
 
 ### Discord
 Sends you Discord notifications via a webhook. Looks something like this:
-![discord webhook](https://i.arxius.io/6c95835f.png)
+![discord webhook](https://i.arxius.io/8b2deaae.png)
 
 - Add a webhook to your channel
 - Make an username, copy the `/api` link into `prod.env` like in the example.
@@ -85,7 +93,7 @@ GOOGLE_KEY="-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n"
 ## Architecture
 ![architecture](https://i.arxius.io/812f05c7.png)
 
-You could possibly simplify this with a better Drive query, I don't know. Also, currently there's no big video support (only <15MB will be uploaded)
+You could possibly simplify this with a better Drive query, I don't know. There is no video support as of now. [Sharp](https://github.com/lovell/sharp) is used to scale images.
 
 ## Enabling debug
 Change in [src/_debug.ts](src/_debug.ts):
@@ -93,6 +101,11 @@ Change in [src/_debug.ts](src/_debug.ts):
 export const _debug = {
 -  enabled: false,
 +  enabled: true,
+```
+Debug has two ways to print (local and Discord), change the file to change them:
+```diff
++ print: (p: any) => {if (_debug.enabled) console.log("[LOG] "+p)},
+-  print: (p: any) => {if (_debug.enabled) sendDiscord({api: process.env.DISCORD_HOOK_ENDPOINT!, username: process.env.DISCORD_USERNAME!}, Messages.debug(p))}
 ```
 
 ## Different fire times

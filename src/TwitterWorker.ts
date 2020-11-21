@@ -2,16 +2,22 @@ import Twitter from "twitter";
 import { DiscordHookAuth, Messages, sendDiscord } from "./DiscordWorker";
 import {_debug} from "./_debug";
 
+
 const maxFilesizes = {
   video: 15000000,
   image: 5000000
 };
 
+export const maxResolutions = {
+  image: [1280, 1080]
+}
+
 export const allowedTypes = [
   {type: "image/png", ext: ["png"], max: maxFilesizes.image},
   {type: "image/jpeg", ext: ["jpeg", "jpg"], max: maxFilesizes.image},
-  {type: "video/mp4", ext: ["mp4"], max: maxFilesizes.video},
-  {type: "image/gif", ext: ["gif"], max: maxFilesizes.video}
+//  Videos disabled due to new processing.
+//  {type: "video/mp4", ext: ["mp4"], max: maxFilesizes.video},
+//  {type: "image/gif", ext: ["gif"], max: maxFilesizes.video}
 ];
 export const allowedTypesByType = allowedTypes.map(x => x.type);
 
@@ -44,6 +50,7 @@ export function postMedia(client_: Twitter, mediaData_: Buffer, mediaSize_: numb
   }
 
   if (mediaSize_ > allowedTypes[allowedTypesByType.indexOf(mediaType_)].max) {
+    _debug.print("Media size: "+mediaSize_)
     sendDiscord(discordAuth, Messages.fail("Media too large."));
     throw new Error("Media too large.")
   }
@@ -54,80 +61,111 @@ export function postMedia(client_: Twitter, mediaData_: Buffer, mediaSize_: numb
   mediaType = mediaType_;
   mediaSize = mediaSize_;
 
-  initializeMediaUpload()
-    .then(appendFileChunk)
-    .then(finalizeUpload)
-    .then(publishStatusUpdate)
+  // initializeMediaUpload()
+  //   .then(appendFileChunk)
+  //   .then(finalizeUpload)
+  //   .then(publishStatusUpdate)
+  publishImage()
     .then(_ => sendDiscord(discordAuth, Messages.success(fileName)))
 }
 
-function initializeMediaUpload(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    client.post("media/upload", {
-      command: "INIT",
-      total_bytes: mediaSize,
-      media_type: mediaType
-    }, (error, data) => {
-      if (error) {
-        sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
-        throw new Error(JSON.stringify(error));
-      } else {
-        _debug.print("Initializing media upload.")
-        resolve(data.media_id_string);
-      }
-    });
-  });
-}
+// function initializeMediaUpload(): Promise<string> {
+//   return new Promise((resolve, reject) => {
+//     client.post("media/upload", {
+//       command: "INIT",
+//       total_bytes: mediaSize,
+//       media_type: mediaType
+//     }, (error, data) => {
+//       if (error) {
+//         sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
+//         throw new Error(JSON.stringify(error));
+//       } else {
+//         _debug.print("Initializing media upload.")
+//         resolve(data.media_id_string);
+//       }
+//     });
+//   });
+// }
 
-function appendFileChunk(mediaId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    client.post("media/upload", {
-      command: "APPEND",
-      media_id: mediaId,
-      media: mediaData,
-      segment_index: 0
-    }, (error, data, response) => {
-      if (error) {
-        sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
-        throw new Error(JSON.stringify(error));
-      } else {
-        _debug.print("Appending data chunk");
-        resolve(mediaId);
-      }
-    });
-  });
-}
+// function appendFileChunk(mediaId: string): Promise<string> {
+//   return new Promise((resolve, reject) => {
+//     client.post("media/upload", {
+//       command: "APPEND",
+//       media_id: mediaId,
+//       media: mediaData,
+//       segment_index: 0
+//     }, (error, data, response) => {
+//       if (error) {
+//         sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
+//         throw new Error(JSON.stringify(error));
+//       } else {
+//         _debug.print("Appending data chunk");
+//         resolve(mediaId);
+//       }
+//     });
+//   });
+// }
 
-function finalizeUpload(mediaId: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    client.post("media/upload", {
-      command: "FINALIZE",
-      media_id: mediaId
-    }, (error, data, response) => {
-      if (error) {
-        sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
-        throw new Error(JSON.stringify(error));
-      } else {
-        _debug.print("Finalizing data upload")
-        resolve(mediaId);
-      }
-    });
-  });
-}
+// function finalizeUpload(mediaId: string): Promise<string> {
+//   return new Promise((resolve, reject) => {
+//     client.post("media/upload", {
+//       command: "FINALIZE",
+//       media_id: mediaId
+//     }, (error, data, response) => {
+//       if (error) {
+//         sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
+//         console.log(error);
+//         throw new Error(JSON.stringify(error));
+//       } else {
+//         _debug.print("Finalizing data upload")
+//         resolve(mediaId);
+//       }
+//     });
+//   });
+// }
 
-function publishStatusUpdate(mediaId: string): Promise<Twitter.ResponseData> {
-  return new Promise((resolve, reject) => {
-    client.post("statuses/update", {
-      status: tweetStatus,
-      media_ids: mediaId
-    }, (error, data, response) => {
-      if (error) {
-        sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
-        throw new Error(JSON.stringify(error));
+// function publishStatusUpdate(mediaId: string): Promise<Twitter.ResponseData> {
+//   return new Promise((resolve, reject) => {
+//     client.post("statuses/update", {
+//       status: tweetStatus,
+//       media_ids: mediaId
+//     }, (error, data, response) => {
+//       if (error) {
+//         sendDiscord(discordAuth, Messages.fail(JSON.stringify(error)));
+//         throw new Error(JSON.stringify(error));
+//       } else {
+//         _debug.print("Successfully posted full tweet");
+//         resolve(data);
+//       }
+//     });
+//   });
+// }
+
+function publishImage() {
+  return new Promise((resolve) => {
+    client.post("media/upload", {
+      media: mediaData
+    }, (err, data, response) => {
+      if (err) {
+        sendDiscord(discordAuth, Messages.fail(JSON.stringify(err)));
+        console.log(err);
+        throw new Error(JSON.stringify(err));
       } else {
-        _debug.print("Successfully posted full tweet");
-        resolve(data);
+        const status = {
+          status: tweetStatus,
+          media_ids: data.media_id_string
+        }
+
+        client.post("statuses/update", status, (err, tweet, res) => {
+          if (err) {
+            sendDiscord(discordAuth, Messages.fail(JSON.stringify(err)));
+            console.log(err);
+            throw new Error(JSON.stringify(err));
+          } else {
+            resolve(data);
+          }
+        })
       }
-    });
+    })
   });
 }
