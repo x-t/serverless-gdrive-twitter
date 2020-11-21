@@ -58,6 +58,7 @@ You will need valid Twitter developer credentials in the form of a set of consum
 - You will need an account for this (free does fine)
 - Create a Function App from the dashboard
 - To deploy to Azure, use the VSC extension, Cmd-Shift-P > Deploy to Function App. I cannot be bothered to set up automatic git deployments, lmao.
+- **Warning**: because of how sharp works, most likely you won't be able to push in the node module. You can replace `node_modules/sharp` with [a version that works for Windows-ia32](https://arxius.io/f/7c96daab) by downloading that ZIP file. It is jank, but trust me if I haven't run through a million different options, I wouldn't have installed a Windows VM and made that ZIP.
 
 ### Discord
 Sends you Discord notifications via a webhook. Looks something like this:
