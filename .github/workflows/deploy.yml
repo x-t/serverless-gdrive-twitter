@@ -6,6 +6,7 @@ on:
       - "src/**"
       - "TwitterTimer1/**"
       - "**.json"
+      - ".github/workflows/deploy.yml"
 
 env:
   AZURE_WEBAPP_NAME: 3horsepowerv8
