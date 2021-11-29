@@ -13,7 +13,14 @@ $ npm install
 $ npm run build
 ```
 
-## Running
+## Running (from binary)
+
+```
+$ docker pull ghcr.io/x-t/serverless-gdrive-twitter:latest
+$ docker run -t --rm --env-file prod.env ghcr.io/x-t/serverless-gdrive-twitter
+```
+
+## Running (from source)
 
 ### On Azure
 
