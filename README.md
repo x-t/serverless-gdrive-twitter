@@ -30,6 +30,17 @@ $ docker build -t 3horsepowerv8 .
 $ docker run -t --rm --env-file prod.env 3horsepowerv8
 ```
 
+This creates a ~250MB image, if a smaller size is needed, [docker-slim](https://dockersl.im) can be used.
+
+```
+$ brew install docker-slim
+$ docker build -t 3horsepowerv8 .
+$ docker-slim build --http-probe-off 3horsepowerv8
+$ docker run -t --rm --env-file prod.env 3horsepowerv8.slim
+```
+
+Now you have a ~130MB container.
+
 ### On your own machine
 
 ```
