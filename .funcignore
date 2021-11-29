@@ -6,3 +6,8 @@ local.settings.json
 test
 tsconfig.json
 src
+Dockerfile
+.dockerignore
+README.md
+LICENSE
+.gitpod.yml

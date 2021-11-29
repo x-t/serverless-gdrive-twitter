@@ -1,4 +1,4 @@
-import { resolve } from "path"
-import { config } from "dotenv"
+import { resolve } from "path";
+import { config } from "dotenv";
 
-config({ path: resolve(__dirname, "../prod.env") })
+config({ path: resolve(__dirname, "../prod.env") });
