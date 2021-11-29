@@ -2,8 +2,10 @@ name: Deploy to Azure Functions
 
 on:
   push:
-    branches:
-      - main
+    paths:
+      - "src/**"
+      - "TwitterTimer1/**"
+      - "**.json"
 
 env:
   AZURE_WEBAPP_NAME: 3horsepowerv8
@@ -17,18 +19,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    
+
     - name: Use Node.js ${{ env.NODE_VERSION }}
       uses: actions/setup-node@v2
       with:
         node-version: ${{ env.NODE_VERSION }}
-        
+
     - name: npm build
       run: |
         npm set npm_config_arch ia32
         npm ci --arch=ia32
         npm run build
-        
+
     - name: 'Deploy to Azure Functions'
       uses: Azure/functions-action@v1
       with:
