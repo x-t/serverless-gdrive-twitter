@@ -9,18 +9,7 @@ $ npm run build
 ```
 
 ## Running
-Because this is designed for Azure scheduled triggers, it doesn't run locally well. However, there is a backup option.
-
-Changes in [index.ts](src/index.ts):
-```diff
-// -- UNCOMMENT BELOW TO RUN LOCALLY --
-- // main();
-+ main();
-```
-Then, launch it from the terminal as usual.
-```
-$ node dist/index.js
-```
+Because this is designed for Azure scheduled triggers, it doesn't run locally well. Check the below section for Azure, which links a guide to run Azure Functions locally.
 
 ## Set up
 ### Google
@@ -57,8 +46,7 @@ You will need valid Twitter developer credentials in the form of a set of consum
 ### Azure
 - You will need an account for this (free does fine)
 - Create a Function App from the dashboard
-- To deploy to Azure, use the VSC extension, Cmd-Shift-P > Deploy to Function App. I cannot be bothered to set up automatic git deployments, lmao.
-- **Warning**: because of how sharp works, most likely you won't be able to push in the node module. You can replace `node_modules/sharp` with [a version that works for Windows-ia32](https://arxius.io/f/7c96daab) by downloading that ZIP file. It is jank, but trust me if I haven't run through a million different options, I wouldn't have installed a Windows VM and made that ZIP.
+- Use included GitHub Action to deploy or [any other method supported by Azure](https://docs.microsoft.com/en-us/azure/azure-functions/create-first-function-cli-node?tabs=azure-cli%2Cbrowser)
 
 ### Discord
 Sends you Discord notifications via a webhook. Looks something like this:

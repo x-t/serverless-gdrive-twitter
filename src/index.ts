@@ -18,11 +18,13 @@ async function main() {
     access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET!
   });
   _debug.print("Authenticated to Twitter");
+
+  const googleKey = process.env.GOOGLE_KEY!.replace(/\\n/g, '\n');
   
   const authClient = new google.auth.JWT(
     process.env.GOOGLE_EMAIL!,
     undefined,
-    process.env.GOOGLE_KEY!,
+    googleKey,
     "https://www.googleapis.com/auth/drive"
   );
   
@@ -60,6 +62,4 @@ const timerTrigger: AzureFunction = async function (context: Context, myTimer: a
   return x;
 }
 
-// -- UNCOMMENT BELOW TO RUN LOCALLY --
-// main();
 export default timerTrigger;
