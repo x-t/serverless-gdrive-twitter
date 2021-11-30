@@ -98,13 +98,13 @@ You will need valid Twitter developer credentials in the form of a set of consum
 - You will need an account for this (free does fine)
 - Create a Function App from the dashboard
 
-### Discord
+### Discord/Slack
 
-Sends you Discord notifications via a webhook. Looks something like this:
+Sends you Discord or Slack notifications via a webhook. Looks something like this:
 ![discord webhook](https://i.arxius.io/6c95835f.png)
 
 - Add a webhook to your channel
-- Make an username, copy the `/api` link into `prod.env` like in the example.
+- Make an username, copy the `/api` or `/services` link into `prod.env` like in the example.
 
 ### prod.env
 
@@ -127,15 +127,23 @@ DRIVE_FOLDER=""
 *Example*
 
 ```
-DISCORD_USERNAME="anything here"
-DISCORD_HOOK_ENDPOINT="/api/webhooks/number/thing"
-TWITTER_CONSUMER_KEY="key"
-TWITTER_CONSUMER_SECRET="key"
-TWITTER_ACCESS_TOKEN_KEY="key"
-TWITTER_ACCESS_TOKEN_SECRET="key"
-GOOGLE_EMAIL="id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com"
-GOOGLE_KEY="-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n"
-DRIVE_FOLDER="Cats"
+DISCORD_USERNAME=anything here
+DISCORD_HOOK_ENDPOINT=/api/webhooks/number/thing
+TWITTER_CONSUMER_KEY=key
+TWITTER_CONSUMER_SECRET=key
+TWITTER_ACCESS_TOKEN_KEY=key
+TWITTER_ACCESS_TOKEN_SECRET=key
+GOOGLE_EMAIL=id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com
+GOOGLE_KEY=-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n
+DRIVE_FOLDER=Cats
+```
+
+To use Slack instead, remove `DISCORD_*` variables and add
+
+```
+NOTIFICATION_WORKER=slack
+SLACK_HOOK_ENDPOINT=/services/aaaaaaa/aaaaaaaaa/aaaaaaaaaaaaaaaaaa
+SLACK_USERNAME=leave empty for default
 ```
 
 ## Architecture

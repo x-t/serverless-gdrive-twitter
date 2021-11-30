@@ -3,7 +3,7 @@ import * as TwitterWorker from "./TwitterWorker";
 import * as Random from "./Random";
 import { JWT } from "googleapis-common";
 import sharp from "sharp";
-import { send_failure_message } from "./DiscordWorker";
+import { send_failure_message } from "./Notification";
 
 interface DriveFileBuf {
   buffer: Buffer | undefined;

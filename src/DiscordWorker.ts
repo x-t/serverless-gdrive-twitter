@@ -35,11 +35,11 @@ function sendDiscord(content: any) {
     username: process.env.DISCORD_USERNAME!,
   };
 
-  if (discordAuth.api === "" || discordAuth.username === "") {
+  if (discordAuth.api === "") {
     return;
   }
 
-  var data = JSON.stringify({
+  const data = JSON.stringify({
     username: discordAuth.username,
     embeds: content.embeds,
   });

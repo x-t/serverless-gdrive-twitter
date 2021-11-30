@@ -1,5 +1,5 @@
 import Twitter from "twitter";
-import { send_failure_message, send_successful_message } from "./DiscordWorker";
+import { send_failure_message, send_successful_message } from "./Notification";
 
 const maxFilesizes = {
   video: 15000000,

@@ -2,14 +2,12 @@ import * as TwitterWorker from "./TwitterWorker";
 import Twitter from "twitter";
 import { google } from "googleapis";
 import * as DriveWorker from "./DriveWorker";
-import { send_failure_message } from "./DiscordWorker";
+import { send_failure_message } from "./Notification";
 import "./env";
 import { AzureFunction, Context } from "@azure/functions";
 import retry from "async-retry";
 
 export async function main() {
-  var timeStamp = new Date().toISOString();
-
   if (
     !process.env.TWITTER_CONSUMER_KEY ||
     !process.env.TWITTER_CONSUMER_SECRET ||
@@ -48,11 +46,11 @@ export async function main() {
     }
   });
 
-  var x = await DriveWorker.getRandomBuffer(
+  const x = await DriveWorker.getRandomBuffer(
     process.env.DRIVE_FOLDER!,
     authClient
   );
-  var y = TwitterWorker.postMedia(
+  const y = TwitterWorker.postMedia(
     client,
     x.buffer!,
     x.size,
