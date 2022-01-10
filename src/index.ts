@@ -1,6 +1,6 @@
 import * as TwitterWorker from "./TwitterWorker";
 import Twitter from "twitter";
-import { google } from "googleapis";
+import drive from "@googleapis/drive";
 import * as DriveWorker from "./DriveWorker";
 import { send_failure_message } from "./Notification";
 import "./env";
@@ -30,7 +30,7 @@ export async function main() {
 
   const googleKey = process.env.GOOGLE_KEY!.replace(/\\n/g, "\n");
 
-  const authClient = new google.auth.JWT(
+  const authClient = new drive.auth.JWT(
     process.env.GOOGLE_EMAIL!,
     undefined,
     googleKey,

@@ -1,4 +1,4 @@
-import { drive_v3, google } from "googleapis";
+import google from "@googleapis/drive";
 import * as TwitterWorker from "./TwitterWorker";
 import * as Random from "./Random";
 import { JWT } from "googleapis-common";
@@ -12,7 +12,7 @@ interface DriveFileBuf {
   mimeType: string;
 }
 
-let drive: drive_v3.Drive;
+let drive: google.drive_v3.Drive;
 
 let maxWidth = TwitterWorker.maxResolutions.image[0];
 let maxHeight = TwitterWorker.maxResolutions.image[1];
@@ -52,8 +52,8 @@ export async function getRandomBuffer(
 
 export function getCorrectFolder(
   folderName: string
-): Promise<drive_v3.Schema$File> {
-  let correctFolder: drive_v3.Schema$File | undefined = undefined;
+): Promise<google.drive_v3.Schema$File> {
+  let correctFolder: google.drive_v3.Schema$File | undefined = undefined;
 
   return new Promise((resolve) =>
     drive.files.list(
@@ -91,10 +91,10 @@ export function getCorrectFolder(
 }
 
 export function getFolderContents(
-  correctFolder: drive_v3.Schema$File,
-  allFiles: drive_v3.Schema$File[],
+  correctFolder: google.drive_v3.Schema$File,
+  allFiles: google.drive_v3.Schema$File[],
   nextPageToken = ""
-): Promise<drive_v3.Schema$File[]> {
+): Promise<google.drive_v3.Schema$File[]> {
   return new Promise((resolve) =>
     drive.files.list(
       {
@@ -132,11 +132,11 @@ export function getFolderContents(
 }
 
 export function getRandomFile(
-  allFiles: drive_v3.Schema$File[]
-): Promise<drive_v3.Schema$File> {
+  allFiles: google.drive_v3.Schema$File[]
+): Promise<google.drive_v3.Schema$File> {
   return new Promise((resolve) => {
     let randNum = Random.Num(allFiles.length);
-    const randomFile: drive_v3.Schema$File = allFiles[randNum];
+    const randomFile: google.drive_v3.Schema$File = allFiles[randNum];
 
     while (true) {
       if (!TwitterWorker.allowedTypesByType.includes(randomFile.mimeType!)) {
@@ -157,7 +157,7 @@ export function getRandomFile(
 }
 
 export function downloadFileToBuffer(
-  file: drive_v3.Schema$File
+  file: google.drive_v3.Schema$File
 ): Promise<DriveFileBuf> {
   return new Promise((resolve) => {
     let fileBuf: DriveFileBuf = {
