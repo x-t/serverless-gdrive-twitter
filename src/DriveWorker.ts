@@ -1,4 +1,4 @@
-import google from "@googleapis/drive";
+import { drive_v3, drive as google_drive } from "@googleapis/drive";
 import * as TwitterWorker from "./TwitterWorker";
 import * as Random from "./Random";
 import { JWT } from "googleapis-common";
@@ -12,7 +12,7 @@ interface DriveFileBuf {
   mimeType: string;
 }
 
-let drive: google.drive_v3.Drive;
+let drive: drive_v3.Drive;
 
 let maxWidth = TwitterWorker.maxResolutions.image[0];
 let maxHeight = TwitterWorker.maxResolutions.image[1];
@@ -42,7 +42,7 @@ export async function getRandomBuffer(
   folderName: string,
   auth_: JWT
 ): Promise<DriveFileBuf> {
-  drive = google.drive({ version: "v3", auth: auth_ });
+  drive = google_drive({ version: "v3", auth: auth_ });
 
   const x = await getCorrectFolder(folderName);
   const allFiles = await getFolderContents(x, [], "");
@@ -52,8 +52,8 @@ export async function getRandomBuffer(
 
 export function getCorrectFolder(
   folderName: string
-): Promise<google.drive_v3.Schema$File> {
-  let correctFolder: google.drive_v3.Schema$File | undefined = undefined;
+): Promise<drive_v3.Schema$File> {
+  let correctFolder: drive_v3.Schema$File | undefined = undefined;
 
   return new Promise((resolve) =>
     drive.files.list(
@@ -91,10 +91,10 @@ export function getCorrectFolder(
 }
 
 export function getFolderContents(
-  correctFolder: google.drive_v3.Schema$File,
-  allFiles: google.drive_v3.Schema$File[],
+  correctFolder: drive_v3.Schema$File,
+  allFiles: drive_v3.Schema$File[],
   nextPageToken = ""
-): Promise<google.drive_v3.Schema$File[]> {
+): Promise<drive_v3.Schema$File[]> {
   return new Promise((resolve) =>
     drive.files.list(
       {
@@ -132,11 +132,11 @@ export function getFolderContents(
 }
 
 export function getRandomFile(
-  allFiles: google.drive_v3.Schema$File[]
-): Promise<google.drive_v3.Schema$File> {
+  allFiles: drive_v3.Schema$File[]
+): Promise<drive_v3.Schema$File> {
   return new Promise((resolve) => {
     let randNum = Random.Num(allFiles.length);
-    const randomFile: google.drive_v3.Schema$File = allFiles[randNum];
+    const randomFile: drive_v3.Schema$File = allFiles[randNum];
 
     while (true) {
       if (!TwitterWorker.allowedTypesByType.includes(randomFile.mimeType!)) {
@@ -157,7 +157,7 @@ export function getRandomFile(
 }
 
 export function downloadFileToBuffer(
-  file: google.drive_v3.Schema$File
+  file: drive_v3.Schema$File
 ): Promise<DriveFileBuf> {
   return new Promise((resolve) => {
     let fileBuf: DriveFileBuf = {

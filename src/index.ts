@@ -1,6 +1,6 @@
 import * as TwitterWorker from "./TwitterWorker";
-import Twitter from "twitter";
-import drive from "@googleapis/drive";
+import Twitter from "twitter-api-v2";
+import { auth } from "@googleapis/drive";
 import * as DriveWorker from "./DriveWorker";
 import { send_failure_message } from "./Notification";
 import "./env";
@@ -22,16 +22,16 @@ export async function main() {
   }
 
   const client = new Twitter({
-    consumer_key: process.env.TWITTER_CONSUMER_KEY!,
-    consumer_secret: process.env.TWITTER_CONSUMER_SECRET!,
-    access_token_key: process.env.TWITTER_ACCESS_TOKEN_KEY!,
-    access_token_secret: process.env.TWITTER_ACCESS_TOKEN_SECRET!,
+    appKey: process.env.TWITTER_CONSUMER_KEY!,
+    appSecret: process.env.TWITTER_CONSUMER_SECRET!,
+    accessToken: process.env.TWITTER_ACCESS_TOKEN_KEY!,
+    accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET!,
   });
 
   const googleKey = process.env.GOOGLE_KEY!.replace(/\\n/g, "\n");
 
-  const authClient = new drive.auth.JWT(
-    process.env.GOOGLE_EMAIL!,
+  const authClient = new auth.JWT(
+    process.env.GOOGLE_EMAIL,
     undefined,
     googleKey,
     "https://www.googleapis.com/auth/drive"
@@ -47,7 +47,7 @@ export async function main() {
   });
 
   const x = await DriveWorker.getRandomBuffer(
-    process.env.DRIVE_FOLDER!,
+    process.env.DRIVE_FOLDER,
     authClient
   );
   const y = TwitterWorker.postMedia(
