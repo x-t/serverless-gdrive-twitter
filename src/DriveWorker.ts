@@ -4,6 +4,16 @@ import * as Random from "./Random";
 import { JWT } from "googleapis-common";
 import sharp from "sharp";
 import { send_failure_message } from "./Notification";
+import type DetaT from "deta/dist/types/deta";
+import {
+  CachedFile,
+  cache_files,
+  is_cache_too_old,
+  read_cache_files,
+  save_image,
+} from "./CacheWorker";
+
+type AnyFile = drive_v3.Schema$File[] | CachedFile[];
 
 interface DriveFileBuf {
   buffer: Buffer | undefined;
@@ -40,14 +50,27 @@ function resizeCalc(width: number, height: number): Array<number> {
 
 export async function getRandomBuffer(
   folderName: string,
-  auth_: JWT
+  auth_: JWT,
+  cacheCon: DetaT | null
 ): Promise<DriveFileBuf> {
   drive = google_drive({ version: "v3", auth: auth_ });
 
-  const x = await getCorrectFolder(folderName);
-  const allFiles = await getFolderContents(x, [], "");
+  const is_cache_old = cacheCon ? await is_cache_too_old(cacheCon) : true;
+
+  let correct_folder: drive_v3.Schema$File, allFiles: AnyFile;
+  if (is_cache_old) {
+    correct_folder = await getCorrectFolder(folderName);
+    allFiles = await getFolderContents(correct_folder, [], "");
+  } else {
+    allFiles = await read_cache_files(cacheCon!);
+  }
+
+  if (is_cache_old && cacheCon) {
+    cache_files(cacheCon, allFiles);
+  }
+
   const file = await getRandomFile(allFiles);
-  return downloadFileToBuffer(file);
+  return downloadFileToBuffer(file, cacheCon);
 }
 
 export function getCorrectFolder(
@@ -157,7 +180,8 @@ export function getRandomFile(
 }
 
 export function downloadFileToBuffer(
-  file: drive_v3.Schema$File
+  file: drive_v3.Schema$File,
+  cacheCon: DetaT | null
 ): Promise<DriveFileBuf> {
   return new Promise((resolve) => {
     let fileBuf: DriveFileBuf = {
@@ -198,6 +222,15 @@ export function downloadFileToBuffer(
                   .resize(newX, newY)
                   .toBuffer();
               });
+
+            if (cacheCon) {
+              save_image(
+                cacheCon,
+                fileBuf.buffer,
+                resizedBuffer,
+                fileBuf.filename
+              );
+            }
 
             fileBuf.buffer = resizedBuffer;
             fileBuf.mimeType = "image/jpeg";

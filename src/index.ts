@@ -6,6 +6,7 @@ import { send_failure_message } from "./Notification";
 import "./env";
 import { AzureFunction, Context } from "@azure/functions";
 import retry from "async-retry";
+import { deta_connect } from "./CacheWorker";
 
 export async function main() {
   if (
@@ -22,10 +23,10 @@ export async function main() {
   }
 
   const client = new Twitter({
-    appKey: process.env.TWITTER_CONSUMER_KEY!,
-    appSecret: process.env.TWITTER_CONSUMER_SECRET!,
-    accessToken: process.env.TWITTER_ACCESS_TOKEN_KEY!,
-    accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET!,
+    appKey: process.env.TWITTER_CONSUMER_KEY,
+    appSecret: process.env.TWITTER_CONSUMER_SECRET,
+    accessToken: process.env.TWITTER_ACCESS_TOKEN_KEY,
+    accessSecret: process.env.TWITTER_ACCESS_TOKEN_SECRET,
   });
 
   const googleKey = process.env.GOOGLE_KEY!.replace(/\\n/g, "\n");
@@ -46,9 +47,12 @@ export async function main() {
     }
   });
 
+  const deta = deta_connect();
+
   const x = await DriveWorker.getRandomBuffer(
     process.env.DRIVE_FOLDER,
-    authClient
+    authClient,
+    deta
   );
   const y = TwitterWorker.postMedia(
     client,

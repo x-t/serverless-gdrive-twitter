@@ -106,6 +106,12 @@ Sends you Discord or Slack notifications via a webhook. Looks something like thi
 - Add a webhook to your channel
 - Make an username, copy the `/api` or `/services` link into `prod.env` like in the example.
 
+### Deta (as cache)
+
+To reduce the amount of listing done by Google Drive, [Deta](https://deta.sh) can be used as a cache, where it holds the latest full-resolution image as well as the full listing of your Google Drive folder.
+
+To opt in, provide your Deta project key as the `DETA_KEY` environment variable. For customisation options, see [CacheWorker.ts](./src/CacheWorker.ts)
+
 ### prod.env
 
 **This is the file that stores all the tokens, usernames and emails.**
@@ -122,6 +128,7 @@ TWITTER_ACCESS_TOKEN_SECRET=""
 GOOGLE_EMAIL=""
 GOOGLE_KEY=""
 DRIVE_FOLDER=""
+DETA_KEY=""
 ```
 
 *Example*
@@ -136,6 +143,7 @@ TWITTER_ACCESS_TOKEN_SECRET=key
 GOOGLE_EMAIL=id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com
 GOOGLE_KEY=-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n
 DRIVE_FOLDER=Cats
+DETA_KEY=key
 ```
 
 To use Slack instead, remove `DISCORD_*` variables and add
@@ -152,7 +160,7 @@ SLACK_USERNAME=leave empty for default
 
 You could possibly simplify this with a better Drive query, I don't know. There is no video support as of now. [Sharp](https://github.com/lovell/sharp) is used to scale images.
 
-## Different fire times
+## Different fire times (Azure)
 
 This is controlled by your Azure Function, via a NCRONTAB syntax. Changes in [TwitterTimer1/function.json](TwitterTimer1/function.json):
 
