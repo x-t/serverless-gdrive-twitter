@@ -64,7 +64,7 @@ export async function postMedia(
 
   try {
     const tw = await client.v1.tweet(fileName, { media_ids: media_ids });
-    send_successful_message(`Tweeted: ${tw.text} (${tw.id})`);
+    send_successful_message(`Tweeted ${fileName} (${tw.id})`);
   } catch (e) {
     send_failure_message(JSON.stringify(e));
     throw new Error(JSON.stringify(e));
