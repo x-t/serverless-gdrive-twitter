@@ -67,6 +67,6 @@ export async function postMedia(
     send_successful_message(`Tweeted ${fileName} (${tw.id})`);
   } catch (e) {
     send_failure_message(JSON.stringify(e));
-    throw new Error(JSON.stringify(e));
+    throw e;
   }
 }

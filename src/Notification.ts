@@ -1,7 +1,7 @@
 import * as Discord from "./DiscordWorker";
 import * as Slack from "./SlackWorker";
 
-type NotificationWorker = "discord" | "slack";
+type NotificationWorker = "discord" | "slack" | "console";
 
 export function get_preferred_worker(): NotificationWorker {
   switch (process.env.NOTIFICATION_WORKER) {
@@ -9,6 +9,8 @@ export function get_preferred_worker(): NotificationWorker {
       return "discord";
     case "slack":
       return "slack";
+    case "console":
+      return "console";
     case "":
     case undefined:
       return "discord";
@@ -27,6 +29,9 @@ export function send_failure_message(text: string) {
     case "slack":
       Slack.send_failure_message(text);
       break;
+    case "console":
+      console.log(`❌ Error! - ${text}`);
+      break;
   }
 }
 
@@ -37,6 +42,9 @@ export function send_successful_message(text: string) {
       break;
     case "slack":
       Slack.send_successful_message(text);
+      break;
+    case "console":
+      console.log(`✅ Success! - ${text}`);
       break;
   }
 }

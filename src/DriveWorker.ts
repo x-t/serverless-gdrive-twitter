@@ -86,7 +86,7 @@ export function getCorrectFolder(
       (err, res) => {
         if (err) {
           send_failure_message(JSON.stringify(err));
-          throw new Error("Drive API error.");
+          throw err;
         } else {
           const files = res?.data.files!;
           if (files.length) {
@@ -128,7 +128,7 @@ export function getFolderContents(
       (err, res) => {
         if (err) {
           send_failure_message(JSON.stringify(err));
-          throw new Error("Drive API error.");
+          throw err;
         } else {
           const files = res?.data.files!;
           if (files.length) {
@@ -203,7 +203,7 @@ export function downloadFileToBuffer(
       (err, data) => {
         if (err) {
           send_failure_message(JSON.stringify(err));
-          throw new Error("Drive API error.");
+          throw err;
         }
 
         let buf: Uint8Array[] = [];
@@ -238,7 +238,7 @@ export function downloadFileToBuffer(
             resolve(fileBuf);
           } catch (error) {
             send_failure_message(JSON.stringify(error));
-            throw new Error(JSON.stringify(error));
+            throw error;
           }
         });
       }

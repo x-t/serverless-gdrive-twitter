@@ -5,8 +5,8 @@ import * as DriveWorker from "./DriveWorker";
 import { send_failure_message } from "./Notification";
 import "./env";
 import { AzureFunction, Context } from "@azure/functions";
-import retry from "async-retry";
 import { deta_connect } from "./CacheWorker";
+import { brute_force } from "./entrypoint";
 
 export async function main() {
   if (
@@ -41,7 +41,7 @@ export async function main() {
   authClient.authorize((err, tokens) => {
     if (err) {
       send_failure_message(JSON.stringify(err));
-      throw new Error("Drive API error");
+      throw err;
     } else {
       authClient.setCredentials(tokens!);
     }
@@ -69,15 +69,7 @@ const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
 ): Promise<void> {
-  let x = await retry(
-    async (bail) => {
-      await main();
-    },
-    {
-      retries: 3,
-    }
-  );
-  return x;
+  brute_force();
 };
 
 export default timerTrigger;

@@ -58,7 +58,7 @@ $ node dist/entrypoint.js
 
 ## Set up
 
-### Google
+### Google (required)
 
 **From https://github.com/terence410/ts-google-drive**
 
@@ -87,30 +87,39 @@ $ node dist/entrypoint.js
 
 These are the only two values you'll need.
 
-### Twitter
+### Twitter (required)
 
 **From https://github.com/desmondmorris/node-twitter**
 
 You will need valid Twitter developer credentials in the form of a set of consumer and access tokens/keys.  You can get these [here](https://apps.twitter.com/).  Do not forgot to adjust your permissions - most POST request require write permissions.
 
-### Azure
+### Azure (optional)
 
 - You will need an account for this (free does fine)
 - Create a Function App from the dashboard
 
-### Discord/Slack
+### Discord/Slack (optional)
 
 Sends you Discord or Slack notifications via a webhook. Looks something like this:
 ![discord webhook](https://i.arxius.io/6c95835f.png)
+![slack webhook](https://pomf2.lain.la/f/o8v5l25x.png)
 
 - Add a webhook to your channel
 - Make an username, copy the `/api` or `/services` link into `prod.env` like in the example.
 
-### Deta (as cache)
+### Console logging
+
+Use `NOTIFICATION_WORKER=console` to replace the Discord & Slack webhook requests with plain old `console.log`
+
+### Deta (as cache) (optional)
 
 To reduce the amount of listing done by Google Drive, [Deta](https://deta.sh) can be used as a cache, where it holds the latest full-resolution image as well as the full listing of your Google Drive folder.
 
 To opt in, provide your Deta project key as the `DETA_KEY` environment variable. For customisation options, see [CacheWorker.ts](./src/CacheWorker.ts)
+
+### Sentry (optional)
+
+Monitor the failures of your bot using [Sentry](https://sentry.io). Use the `SENTRY_DSN` environment variable.
 
 ### prod.env
 
@@ -129,6 +138,7 @@ GOOGLE_EMAIL=""
 GOOGLE_KEY=""
 DRIVE_FOLDER=""
 DETA_KEY=""
+SENTRY_DSN=""
 ```
 
 *Example*
@@ -144,6 +154,7 @@ GOOGLE_EMAIL=id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com
 GOOGLE_KEY=-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n
 DRIVE_FOLDER=Cats
 DETA_KEY=key
+SENTRY_DSN=https://pass@id.ingest.sentry.io/000000
 ```
 
 To use Slack instead, remove `DISCORD_*` variables and add
