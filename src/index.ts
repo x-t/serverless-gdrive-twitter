@@ -6,7 +6,9 @@ import { send_failure_message } from "./Notification";
 import "./env";
 import { AzureFunction, Context } from "@azure/functions";
 import { deta_connect } from "./CacheWorker";
-import { brute_force } from "./entrypoint";
+import retry from "async-retry";
+import * as Sentry from "@sentry/node";
+import { RewriteFrames } from "@sentry/integrations";
 
 export async function main() {
   if (
@@ -65,6 +67,38 @@ export async function main() {
   return y;
 }
 
+export const brute_force = async function () {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+
+    // Set tracesSampleRate to 1.0 to capture 100%
+    // of transactions for performance monitoring.
+    // We recommend adjusting this value in production
+    tracesSampleRate: 0.1,
+    integrations: [
+      new RewriteFrames({
+        // @ts-ignore
+        root: global.__rootdir__,
+      }),
+    ],
+  });
+
+  let x = await retry(
+    async (bail) => {
+      try {
+        await main();
+      } catch (e) {
+        Sentry.captureException(e);
+        throw e;
+      }
+    },
+    {
+      retries: 3,
+    }
+  );
+  return x;
+};
+
 const timerTrigger: AzureFunction = async function (
   context: Context,
   myTimer: any
@@ -73,3 +107,7 @@ const timerTrigger: AzureFunction = async function (
 };
 
 export default timerTrigger;
+
+if (require.main === module) {
+  brute_force();
+}

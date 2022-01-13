@@ -53,7 +53,7 @@ Now you have a ~130MB container.
 ### On your own machine
 
 ```
-$ node dist/entrypoint.js
+$ node dist/index.js
 ```
 
 ## Set up

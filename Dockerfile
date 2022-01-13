@@ -5,7 +5,7 @@ WORKDIR /app
 
 # Pass 1 - compile TypeScript
 RUN npm ci
-RUN npm run build
+RUN npm run build:prod
 RUN rm -rf src
 
 # Pass 2 - get runtime dependencies
@@ -15,4 +15,4 @@ RUN npm ci --only=production
 FROM gcr.io/distroless/nodejs:16
 COPY --from=builder /app /app
 WORKDIR /app
-CMD ["dist/entrypoint.js"]
+CMD ["dist/index.js"]
