@@ -169,7 +169,9 @@ SLACK_USERNAME=leave empty for default
 
 ![architecture](https://i.arxius.io/8b2deaae.png)
 
-You could possibly simplify this with a better Drive query, I don't know. There is no video support as of now. [Sharp](https://github.com/lovell/sharp) is used to scale images.
+You could possibly simplify this with a better Drive query, I don't know. [Sharp](https://github.com/lovell/sharp) is used to scale images.
+
+Video support isn't battle-tested, but should work. Remember Twitter's limits: `<512MB && <140s`.
 
 ## Different fire times (Azure)
 

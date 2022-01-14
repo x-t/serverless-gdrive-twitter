@@ -11,6 +11,7 @@ import {
   is_cache_too_old,
   read_cache_files,
   save_image,
+  save_video,
 } from "./CacheWorker";
 
 type AnyFile = drive_v3.Schema$File[] | CachedFile[];
@@ -69,8 +70,8 @@ export async function getRandomBuffer(
     cache_files(cacheCon, allFiles);
   }
 
-  const file = await getRandomFile(allFiles);
-  return downloadFileToBuffer(file, cacheCon);
+  const file = await getRandomFile(allFiles, cacheCon);
+  return file;
 }
 
 export function getCorrectFolder(
@@ -123,7 +124,8 @@ export function getFolderContents(
       {
         q: `'${correctFolder!.id}' in parents`,
         pageToken: nextPageToken,
-        fields: "nextPageToken,files(name,id,parents,size,mimeType)",
+        fields:
+          "nextPageToken,files(name,id,parents,size,mimeType,videoMediaMetadata)",
       },
       (err, res) => {
         if (err) {
@@ -155,33 +157,93 @@ export function getFolderContents(
 }
 
 export function getRandomFile(
-  allFiles: drive_v3.Schema$File[]
-): Promise<drive_v3.Schema$File> {
-  return new Promise((resolve) => {
+  allFiles: drive_v3.Schema$File[],
+  cacheCon: DetaT | null
+): Promise<DriveFileBuf> {
+  return new Promise(async (resolve) => {
     let randNum = Random.Num(allFiles.length);
-    const randomFile: drive_v3.Schema$File = allFiles[randNum];
 
     while (true) {
-      if (!TwitterWorker.allowedTypesByType.includes(randomFile.mimeType!)) {
-        // TODO: If decided to support video, below line
-        // should take in consideration the filesize of the video.
-        // With images it will be fine, as we already resize/compress them.
-
-        /*|| parseInt(randomFile.size!) > TwitterWorker.allowedTypes[TwitterWorker.allowedTypesByType.indexOf(randomFile.mimeType!)].max*/
+      if (
+        !TwitterWorker.allowedTypesByType.includes(allFiles[randNum].mimeType!)
+      ) {
         randNum = Random.Num(allFiles.length);
         continue;
       } else {
-        break;
+        // Check if this file is an image
+        if (
+          allFiles[randNum].mimeType!.includes("image") &&
+          allFiles[randNum].mimeType != "image/gif"
+        ) {
+          const imageBuffer = await downloadFileToBuffer(allFiles[randNum]);
+          const resizedBuffer = await compressImage(imageBuffer);
+
+          if (
+            resizedBuffer.size! >
+            TwitterWorker.allowedTypes[
+              TwitterWorker.allowedTypesByType.indexOf(resizedBuffer.mimeType!)
+            ].max
+          ) {
+            randNum = Random.Num(allFiles.length);
+            continue;
+          }
+
+          if (cacheCon) {
+            save_image(
+              cacheCon,
+              imageBuffer.buffer!,
+              resizedBuffer.buffer!,
+              imageBuffer.filename
+            );
+          }
+
+          resolve(resizedBuffer);
+          break;
+        } else if (
+          allFiles[randNum].mimeType! == "image/gif" ||
+          allFiles[randNum].mimeType!.includes("video")
+        ) {
+          if (
+            // GIF must be <15MB, MP4 must be <512MB
+            parseInt(allFiles[randNum].size!) >
+              TwitterWorker.allowedTypes[
+                TwitterWorker.allowedTypesByType.indexOf(
+                  allFiles[randNum].mimeType!
+                )
+              ].max ||
+            // MP4 is not yet processed
+            (allFiles[randNum].mimeType!.includes("video") &&
+              !allFiles[randNum].videoMediaMetadata) ||
+            // MP4 must be <140s
+            (allFiles[randNum].mimeType!.includes("video") &&
+              parseInt(allFiles[randNum].videoMediaMetadata!.durationMillis!) >
+                TwitterWorker.maxLengthMillis)
+          ) {
+            randNum = Random.Num(allFiles.length);
+            continue;
+          }
+
+          const videoBuffer = await downloadFileToBuffer(allFiles[randNum]);
+
+          if (cacheCon) {
+            save_video(
+              cacheCon,
+              videoBuffer.buffer!,
+              videoBuffer.filename,
+              videoBuffer.mimeType
+            );
+          }
+
+          resolve(videoBuffer);
+          break;
+        }
       }
     }
-
-    resolve(randomFile);
   });
 }
 
 export function downloadFileToBuffer(
-  file: drive_v3.Schema$File,
-  cacheCon: DetaT | null
+  file: drive_v3.Schema$File
 ): Promise<DriveFileBuf> {
   return new Promise((resolve) => {
     let fileBuf: DriveFileBuf = {
@@ -211,37 +273,38 @@ export function downloadFileToBuffer(
         data?.data.on("end", async () => {
           fileBuf.buffer = Buffer.concat(buf);
 
-          // Resizing the image.
-          try {
-            let resizedBuffer: Buffer = await sharp(fileBuf.buffer)
-              .metadata()
-              .then((md) => {
-                let [newX, newY] = resizeCalc(md.width!, md.height!);
-                return sharp(fileBuf.buffer)
-                  .jpeg({ quality: 40 })
-                  .resize(newX, newY)
-                  .toBuffer();
-              });
-
-            if (cacheCon) {
-              save_image(
-                cacheCon,
-                fileBuf.buffer,
-                resizedBuffer,
-                fileBuf.filename
-              );
-            }
-
-            fileBuf.buffer = resizedBuffer;
-            fileBuf.mimeType = "image/jpeg";
-            fileBuf.size = resizedBuffer.byteLength;
-            resolve(fileBuf);
-          } catch (error) {
-            send_failure_message(JSON.stringify(error));
-            throw error;
-          }
+          resolve(fileBuf);
         });
       }
     );
   });
 }
+
+const compressImage = async (fileBuf: DriveFileBuf) => {
+  let newBuf: DriveFileBuf = {
+    filename: fileBuf.filename!,
+    mimeType: fileBuf.mimeType!,
+    size: 0,
+    buffer: undefined,
+  };
+
+  try {
+    let resizedBuffer: Buffer = await sharp(fileBuf.buffer)
+      .metadata()
+      .then((md) => {
+        let [newX, newY] = resizeCalc(md.width!, md.height!);
+        return sharp(fileBuf.buffer)
+          .jpeg({ quality: 40 })
+          .resize(newX, newY)
+          .toBuffer();
+      });
+
+    newBuf.buffer = resizedBuffer;
+    newBuf.mimeType = "image/jpeg";
+    newBuf.size = resizedBuffer.byteLength;
+    return newBuf;
+  } catch (error) {
+    send_failure_message(JSON.stringify(error));
+    throw error;
+  }
+};

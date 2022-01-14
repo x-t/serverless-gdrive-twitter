@@ -2,19 +2,23 @@ import Twitter from "twitter-api-v2";
 import { send_failure_message, send_successful_message } from "./Notification";
 
 const maxFilesizes = {
-  video: 15000000,
+  gif: 15000000,
   image: 5000000,
+  video: 512000000,
 };
 
 export const maxResolutions = {
   image: [1280, 1080],
 };
 
+export const maxLengthMillis = 140000;
+
 export const allowedTypes = [
   { type: "image/png", ext: ["png"], max: maxFilesizes.image },
   { type: "image/jpeg", ext: ["jpeg", "jpg"], max: maxFilesizes.image },
-  //  {type: "video/mp4", ext: ["mp4"], max: maxFilesizes.video},
-  //  {type: "image/gif", ext: ["gif"], max: maxFilesizes.video}
+
+  { type: "video/mp4", ext: ["mp4"], max: maxFilesizes.video },
+  { type: "image/gif", ext: ["gif"], max: maxFilesizes.gif },
 ];
 export const allowedTypesByType = allowedTypes.map((x) => x.type);
 
@@ -55,10 +59,18 @@ export async function postMedia(
 
   const media_ids = await Promise.all([
     client.v1.uploadMedia(mediaData_, {
-      // Sharp converts everything to jpg, but this
-      // should probably be a little more dynamic if you
-      // want to upload more than just images...
-      type: "jpg",
+      type: (() => {
+        switch (mediaType_) {
+          case "image/png":
+            return "png";
+          case "image/jpeg":
+            return "jpg";
+          case "image/gif":
+            return "gif";
+          case "video/mp4":
+            return "longmp4";
+        }
+      })(),
     }),
   ]);
 

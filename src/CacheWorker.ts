@@ -20,6 +20,7 @@ export interface CachedFile {
   mimeType: string;
   size: string;
   id: string;
+  videoMediaMetadata: drive_v3.Schema$File["videoMediaMetadata"];
 }
 
 const env_config = {
@@ -29,6 +30,7 @@ const env_config = {
   last_cached: process.env.DETA_KEY_LAST_CACHED || "last_time_drive_cached",
   last_filename: process.env.DETA_KEY_LAST_FILENAME || "last_filename",
   image_drive: process.env.DETA_IMAGE_DRIVE || "cache_drive",
+  last_folder_used: process.env.DETA_KEY_LAST_FOLDER_USED || "last_folder_used",
 };
 
 export const deta_connect = () => {
@@ -39,15 +41,28 @@ export const deta_connect = () => {
   return Deta(process.env.DETA_KEY);
 };
 
-const read_config = async (con: DetaT): Promise<any> => {
+const read_config = async (con: DetaT) => {
   const db = con.Base(env_config.config_table);
-  const last_time_run = await db.get(env_config.last_run);
-  const last_time_cached = await db.get(env_config.last_cached);
-  return { db, last_time_run, last_time_cached };
+  const last_time_run = (await db.get(
+    env_config.last_run
+  )) as unknown as string;
+  const last_time_cached = (await db.get(
+    env_config.last_cached
+  )) as unknown as string;
+  const last_folder_used = (await db.get(
+    env_config.last_folder_used
+  )) as unknown as string;
+  return { db, last_time_run, last_time_cached, last_folder_used };
 };
 
 export const is_cache_too_old = async (con: DetaT): Promise<boolean> => {
-  const { last_time_cached } = await read_config(con);
+  const { last_time_cached, last_folder_used } = await read_config(con);
+  if (last_folder_used != process.env.DRIVE_FOLDER!) {
+    await con
+      .Base(env_config.config_table)
+      .put(process.env.DRIVE_FOLDER!, env_config.last_folder_used);
+    return true;
+  }
   if (!last_time_cached) return true;
   return Date.parse(last_time_cached) < Date.now() - 1000 * 60 * 60 * 24 * 7;
 };
@@ -63,6 +78,22 @@ export const save_image = async (
   const data = await sharp(image).webp({ lossless: true }).toBuffer();
   await drive.put("latest.webp", { data: data, contentType: "image/webp" });
   await drive.put("resized.jpg", { data: resized, contentType: "image/jpg" });
+  await db.put(filename, env_config.last_filename);
+  await db.put(new Date().toISOString(), env_config.last_run);
+};
+
+export const save_video = async (
+  con: DetaT,
+  video: Buffer,
+  filename: string,
+  mimeType: string
+) => {
+  const drive = con.Drive(env_config.image_drive);
+  const db = con.Base(env_config.config_table);
+  await drive.put(`latest.${mimeType.split("/")[1]}`, {
+    data: video,
+    contentType: mimeType,
+  });
   await db.put(filename, env_config.last_filename);
   await db.put(new Date().toISOString(), env_config.last_run);
 };
@@ -120,6 +151,7 @@ export const cache_files = async (
         key: f.id,
         size: f.size,
         mimeType: f.mimeType,
+        videoMediaMetadata: f.videoMediaMetadata,
       }))
     );
   }
