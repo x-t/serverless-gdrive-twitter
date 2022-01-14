@@ -61,8 +61,7 @@ export async function main() {
     x.buffer!,
     x.size,
     x.mimeType,
-    x.filename,
-    `${x.filename}`
+    x.filename
   );
   return y;
 }

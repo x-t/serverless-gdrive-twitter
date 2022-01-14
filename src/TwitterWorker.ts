@@ -25,7 +25,6 @@ export const allowedTypesByType = allowedTypes.map((x) => x.type);
 let client: Twitter;
 let mediaSize: number;
 let mediaType: string;
-let tweetStatus: string;
 let mediaData: Buffer;
 
 export async function postMedia(
@@ -33,9 +32,9 @@ export async function postMedia(
   mediaData_: Buffer,
   mediaSize_: number,
   mediaType_: string,
-  fileName: string,
-  status_: string
+  fileName: string
 ) {
+  const status_ = makeStatusStringFromTemplate(fileName);
   if (status_.length > 280) {
     send_failure_message("Tweet over 280 characters.");
     throw new Error("Tweet over 280 characters.");
@@ -53,7 +52,6 @@ export async function postMedia(
 
   client = client_;
   mediaData = mediaData_;
-  tweetStatus = status_;
   mediaType = mediaType_;
   mediaSize = mediaSize_;
 
@@ -75,10 +73,23 @@ export async function postMedia(
   ]);
 
   try {
-    const tw = await client.v1.tweet(fileName, { media_ids: media_ids });
-    send_successful_message(`Tweeted ${fileName} (${tw.id})`);
+    const tw = await client.v1.tweet(status_, { media_ids: media_ids });
+    send_successful_message(makeMessageFromTemplate(fileName, tw.id));
   } catch (e) {
     send_failure_message(JSON.stringify(e));
     throw e;
   }
 }
+
+const makeStatusStringFromTemplate = (fileName: string) => {
+  const template = process.env.TWITTER_TWEET_FORMAT || "{fileName}";
+  const status = template.replace(/\{fileName\}/g, fileName);
+  return status;
+};
+
+const makeMessageFromTemplate = (fileName: string, id: number) => {
+  const template =
+    process.env.SUCCESS_MESSAGE_FORMAT || "Tweeted {fileName} ({id})";
+  const message = template.replace(/\{fileName\}/g, fileName);
+  return message.replace(/\{id\}/g, id.toString());
+};

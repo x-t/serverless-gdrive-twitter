@@ -93,6 +93,8 @@ These are the only two values you'll need.
 
 You will need valid Twitter developer credentials in the form of a set of consumer and access tokens/keys.  You can get these [here](https://apps.twitter.com/).  Do not forgot to adjust your permissions - most POST request require write permissions.
 
+To set a custom status, use `TWITTER_TWEET_FORMAT`, default is `{fileName}`.
+
 ### Azure (optional)
 
 - You will need an account for this (free does fine)
@@ -107,6 +109,8 @@ Sends you Discord or Slack notifications via a webhook. Looks something like thi
 - Add a webhook to your channel
 - Make an username, copy the `/api` or `/services` link into `prod.env` like in the example.
 
+To mess with the format of the message, use `SUCCESS_MESSAGE_FORMAT`, default is `Tweeted {fileName} - {id}`
+
 ### Console logging
 
 Use `NOTIFICATION_WORKER=console` to replace the Discord & Slack webhook requests with plain old `console.log`
@@ -115,7 +119,7 @@ Use `NOTIFICATION_WORKER=console` to replace the Discord & Slack webhook request
 
 To reduce the amount of listing done by Google Drive, [Deta](https://deta.sh) can be used as a cache, where it holds the latest full-resolution image as well as the full listing of your Google Drive folder.
 
-To opt in, provide your Deta project key as the `DETA_KEY` environment variable. For customisation options, see [CacheWorker.ts](./src/CacheWorker.ts)
+To opt in, provide your Deta project key as the `DETA_KEY` environment variable.
 
 ### Sentry (optional)
 
@@ -127,45 +131,9 @@ Monitor the failures of your bot using [Sentry](https://sentry.io). Use the `SEN
 
 It can be replaced by just using the environment, such as the "Configuration" tab in Azure or [-env in Docker](https://docs.docker.com/engine/reference/commandline/run/#set-environment-variables--e---env---env-file).
 
-```
-DISCORD_USERNAME=""
-DISCORD_HOOK_ENDPOINT=""
-TWITTER_CONSUMER_KEY=""
-TWITTER_CONSUMER_SECRET=""
-TWITTER_ACCESS_TOKEN_KEY=""
-TWITTER_ACCESS_TOKEN_SECRET=""
-GOOGLE_EMAIL=""
-GOOGLE_KEY=""
-DRIVE_FOLDER=""
-DETA_KEY=""
-SENTRY_DSN=""
-```
+For a list of all options and examples, see [CONFIG.md](CONFIG.md)
 
-*Example*
-
-```
-DISCORD_USERNAME=anything here
-DISCORD_HOOK_ENDPOINT=/api/webhooks/number/thing
-TWITTER_CONSUMER_KEY=key
-TWITTER_CONSUMER_SECRET=key
-TWITTER_ACCESS_TOKEN_KEY=key
-TWITTER_ACCESS_TOKEN_SECRET=key
-GOOGLE_EMAIL=id-whatever-whenever@idyllic-script-000000.iam.gserviceaccount.com
-GOOGLE_KEY=-----BEGIN PRIVATE KEY-----\nVERYLONG\n-----END PRIVATE KEY-----\n
-DRIVE_FOLDER=Cats
-DETA_KEY=key
-SENTRY_DSN=https://pass@id.ingest.sentry.io/000000
-```
-
-To use Slack instead, remove `DISCORD_*` variables and add
-
-```
-NOTIFICATION_WORKER=slack
-SLACK_HOOK_ENDPOINT=/services/aaaaaaa/aaaaaaaaa/aaaaaaaaaaaaaaaaaa
-SLACK_USERNAME=leave empty for default
-```
-
-## Architecture
+## Architecture (outdated)
 
 ![architecture](https://i.arxius.io/8b2deaae.png)
 

@@ -10,10 +10,9 @@ export function get_preferred_worker(): NotificationWorker {
     case "slack":
       return "slack";
     case "console":
-      return "console";
     case "":
     case undefined:
-      return "discord";
+      return "console";
     default:
       throw new Error(
         `Unknown notification worker: ${process.env.NOTIFICATION_WORKER}`
