@@ -112,14 +112,15 @@ export const cache_files = async (
     (file) => !files.find((f) => f.id === file.id)
   );
 
-  for (const file of newFiles) {
-    await db.put(
-      {
-        name: file.name,
-        size: file.size,
-        mimeType: file.mimeType,
-      },
-      file.id!
+  for (let i = 0; i < newFiles.length; i += 25) {
+    const batch = newFiles.slice(i, i + 25);
+    await db.putMany(
+      batch.map((f) => ({
+        name: f.name,
+        key: f.id,
+        size: f.size,
+        mimeType: f.mimeType,
+      }))
     );
   }
 
