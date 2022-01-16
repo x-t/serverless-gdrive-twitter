@@ -1,5 +1,5 @@
 import Twitter from "twitter-api-v2";
-import { send_failure_message, send_successful_message } from "./Notification";
+import { send_successful_message } from "./Notification";
 
 const maxFilesizes = {
   gif: 15000000,
@@ -36,17 +36,14 @@ export async function postMedia(
 ) {
   const status_ = makeStatusStringFromTemplate(fileName);
   if (status_.length > 280) {
-    send_failure_message("Tweet over 280 characters.");
     throw new Error("Tweet over 280 characters.");
   }
 
   if (!allowedTypesByType.includes(mediaType_)) {
-    send_failure_message("Media type is not allowed.");
     throw new Error("Media type is not allowed.");
   }
 
   if (mediaSize_ > allowedTypes[allowedTypesByType.indexOf(mediaType_)].max) {
-    send_failure_message("Media too large.");
     throw new Error("Media too large.");
   }
 
@@ -76,7 +73,6 @@ export async function postMedia(
     const tw = await client.v1.tweet(status_, { media_ids: media_ids });
     send_successful_message(makeMessageFromTemplate(fileName, tw.id));
   } catch (e) {
-    send_failure_message(JSON.stringify(e));
     throw e;
   }
 }

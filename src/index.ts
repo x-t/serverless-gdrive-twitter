@@ -20,7 +20,6 @@ export async function main() {
     !process.env.GOOGLE_KEY ||
     !process.env.DRIVE_FOLDER
   ) {
-    send_failure_message("Missing environment variables");
     throw new Error("Missing environment variables");
   }
 
@@ -42,7 +41,6 @@ export async function main() {
 
   authClient.authorize((err, tokens) => {
     if (err) {
-      send_failure_message(JSON.stringify(err));
       throw err;
     } else {
       authClient.setCredentials(tokens!);
@@ -87,6 +85,7 @@ export const brute_force = async function () {
       try {
         await main();
       } catch (e) {
+        send_failure_message(JSON.stringify(e));
         Sentry.captureException(e);
         throw e;
       }

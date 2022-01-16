@@ -3,7 +3,6 @@ import * as TwitterWorker from "./TwitterWorker";
 import * as Random from "./Random";
 import { JWT } from "googleapis-common";
 import sharp from "sharp";
-import { send_failure_message } from "./Notification";
 import type DetaT from "deta/dist/types/deta";
 import {
   CachedFile,
@@ -86,7 +85,6 @@ export function getCorrectFolder(
       },
       (err, res) => {
         if (err) {
-          send_failure_message(JSON.stringify(err));
           throw err;
         } else {
           const files = res?.data.files!;
@@ -103,9 +101,6 @@ export function getCorrectFolder(
 
             resolve(correctFolder);
           } else {
-            send_failure_message(
-              "Drive API: No files found. (scope:getCorrectFolder)"
-            );
             throw new Error("No files found.");
           }
         }
@@ -129,7 +124,6 @@ export function getFolderContents(
       },
       (err, res) => {
         if (err) {
-          send_failure_message(JSON.stringify(err));
           throw err;
         } else {
           const files = res?.data.files!;
@@ -145,9 +139,6 @@ export function getFolderContents(
               resolve(allFiles);
             }
           } else {
-            send_failure_message(
-              "Drive API: No files found. (scope:getFolderContents)"
-            );
             throw new Error("No files found.");
           }
         }
@@ -264,7 +255,6 @@ export function downloadFileToBuffer(
       },
       (err, data) => {
         if (err) {
-          send_failure_message(JSON.stringify(err));
           throw err;
         }
 
@@ -304,7 +294,6 @@ const compressImage = async (fileBuf: DriveFileBuf) => {
     newBuf.size = resizedBuffer.byteLength;
     return newBuf;
   } catch (error) {
-    send_failure_message(JSON.stringify(error));
     throw error;
   }
 };
