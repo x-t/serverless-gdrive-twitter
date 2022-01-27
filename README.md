@@ -39,7 +39,7 @@ $ docker build -t 3horsepowerv8 .
 $ docker run -t --rm --env-file prod.env 3horsepowerv8
 ```
 
-This creates a ~250MB image, if a smaller size is needed, [docker-slim](https://dockersl.im) can be used.
+This creates a basic image, if a smaller size is needed, [docker-slim](https://dockersl.im) can be used.
 
 ```
 $ brew install docker-slim
@@ -48,7 +48,7 @@ $ docker-slim build --http-probe-off 3horsepowerv8
 $ docker run -t --rm --env-file prod.env 3horsepowerv8.slim
 ```
 
-Now you have a ~130MB container.
+Now you have a smaller image.
 
 ### On your own machine
 
@@ -93,13 +93,6 @@ These are the only two values you'll need.
 
 You will need valid Twitter developer credentials in the form of a set of consumer and access tokens/keys.  You can get these [here](https://apps.twitter.com/).  Do not forgot to adjust your permissions - most POST request require write permissions.
 
-To set a custom status, use `TWITTER_TWEET_FORMAT`, default is `{fileName}`.
-
-### Azure (optional)
-
-- You will need an account for this (free does fine)
-- Create a Function App from the dashboard
-
 ### Discord/Slack (optional)
 
 Sends you Discord or Slack notifications via a webhook. Looks something like this:
@@ -109,21 +102,13 @@ Sends you Discord or Slack notifications via a webhook. Looks something like thi
 - Add a webhook to your channel
 - Make an username, copy the `/api` or `/services` link into `prod.env` like in the example.
 
-To mess with the format of the message, use `SUCCESS_MESSAGE_FORMAT`, default is `Tweeted {fileName} - {id}`
-
-### Console logging
-
-Use `NOTIFICATION_WORKER=console` to replace the Discord & Slack webhook requests with plain old `console.log`
-
 ### Deta (as cache) (optional)
 
 To reduce the amount of listing done by Google Drive, [Deta](https://deta.sh) can be used as a cache, where it holds the latest full-resolution image as well as the full listing of your Google Drive folder.
 
-To opt in, provide your Deta project key as the `DETA_KEY` environment variable.
-
 ### Sentry (optional)
 
-Monitor the failures of your bot using [Sentry](https://sentry.io). Use the `SENTRY_DSN` environment variable.
+Monitor the failures of your bot using [Sentry](https://sentry.io).
 
 ### prod.env
 
@@ -133,13 +118,13 @@ It can be replaced by just using the environment, such as the "Configuration" ta
 
 For a list of all options and examples, see [CONFIG.md](CONFIG.md)
 
-## Architecture (outdated)
+## Architecture
 
-![architecture](https://i.arxius.io/8b2deaae.png)
+![architecture](https://pomf2.lain.la/f/aa7hqmlw.png)
 
-You could possibly simplify this with a better Drive query, I don't know. [Sharp](https://github.com/lovell/sharp) is used to scale images.
+[Sharp](https://github.com/lovell/sharp) is used to scale images. Thus, won't run on [WASM workers](https://workers.cloudflare.com).
 
-Video support isn't battle-tested, but should work. Remember Twitter's limits: `<512MB && <140s`.
+Video support isn't battle-tested, but should work.
 
 ## Different fire times (Azure)
 
