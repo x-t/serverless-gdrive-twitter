@@ -21,7 +21,7 @@
   "homepage": "https://github.com/x-t/serverless-gdrive-twitter#readme",
   "dependencies": {
     "@azure/functions": "^3.0.0",
-    "@googleapis/drive": "^2.1.0",
+    "@googleapis/drive": "^2.2.0",
     "@sentry/integrations": "^6.17.2",
     "@sentry/node": "^6.17.2",
     "@sentry/tracing": "^6.17.2",
